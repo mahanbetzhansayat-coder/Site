@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог курсов | LearnHub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+<body>
+    <main class="main-content">
+
+        <header class="topbar">
+            <a href="/" class="logo">LearnHub</a>
+
+            <nav>
+                {% if current_user %}
+                <a href="/profile">Мой профиль</a>
+                <a href="/my-courses">Мои курсы</a>
+                <a href="/logout">Выйти</a>
+                {% else %}
+                <a href="/login">Войти</a>
+                <a href="/register">Регистрация</a>
+                {% endif %}
+                <a href="/">Главная</a>
+                <a href="/courses">Курсы</a>
+                <a href="/quizzes">Тесты</a>
+                <a href="/reviews">Отзывы</a>
+                <form class="nav-search" action="/search" method="GET" role="search">
+                    <input type="search" name="q" placeholder="Поиск…" value="{{ request.args.get('q', '') if request.endpoint == 'search' else '' }}" aria-label="Поиск по сайту">
+                </form>
+                <button type="button" class="theme-toggle" title="Сменить тему">🌙</button>
+            </nav>
+        </header>
+
+        <section class="hero">
+            <p class="eyebrow">ОБУЧАЮЩАЯ ПЛАТФОРМА</p>
+            <h1>Каталог курсов</h1>
+            <p>Изучай новые технологии и развивай свои навыки.</p>
+        </section>
+
+        <section class="catalog-section">
+            <div class="catalog-heading">
+                <div>
+                    <p class="eyebrow">ТВОЁ СЛЕДУЮЩЕЕ ДОСТИЖЕНИЕ</p>
+                    <h2>Все курсы</h2>
+                </div>
+
+                <span class="catalog-count">
+                    {{ courses|length }} курсов
+                </span>
+            </div>
+
+            <!-- БЛОК ПОИСКА И ФИЛЬТРАЦИИ -->
+            <form class="search-filter-form" method="GET" action="/courses">
+                <input 
+                    type="text" 
+                    name="q" 
+                    placeholder="Найти курс (например, Python)..." 
+                    value="{{ search_query }}">
+                
+                <select name="category">
+                    <option value="">Все категории</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat }}" {% if cat == current_category %}selected{% endif %}>
+                            {{ cat }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <select name="sort" aria-label="Сортировка" onchange="this.form.submit()">
+                    {% for value, label in [
+                        ('new', 'Сначала новые'),
+                        ('rating', 'По рейтингу'),
+                        ('popular', 'Популярные'),
+                        ('price_asc', 'Сначала дешевле'),
+                        ('price_desc', 'Сначала дороже')
+                    ] %}
+                    <option value="{{ value }}" {% if value == current_sort %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="button">Найти</button>
+            </form>
+            <!-- КОНЕЦ БЛОКА ПОИСКА -->
+
+            <div class="course-grid">
+                {% for course in courses %}
+                <article class="course-card">
+
+                    <div class="course-card-top">
+                        <span class="course-category">
+                            {{ course[3] or 'Без категории' }}
+                        </span>
+
+                        <div class="course-icon">✦</div>
+                    </div>
+
+                    <div class="course-card-content">
+                        <h3>{{ course[1] }}</h3>
+
+                        <p class="card-rating">
+                            {% if course[5] is not none %}
+                            <span class="stars" style="--rating: {{ course[5] }}" aria-hidden="true"></span>
+                            <strong>{{ course[5] }}</strong> <span>({{ course[6] }})</span>
+                            {% else %}
+                            <span class="no-rating">Нет оценок</span>
+                            {% endif %}
+                            <span class="card-students">· {{ course[7] }} студентов</span>
+                        </p>
+
+                        <p class="course-instructor">
+                            <span>Преподаватель</span>
+                            <strong>
+                                {{ course[4] or 'Не указан' }}
+                            </strong>
+                        </p>
+                    </div>
+
+                    <div class="course-card-footer">
+                        <div class="course-price">
+                            <span>Стоимость курса</span>
+                            <strong>
+                                {{ "%.2f"|format(course[2] or 0) }} ₸
+                            </strong>
+                        </div>
+
+                        <a
+                            class="button course-button"
+                            href="/courses/{{ course[0] }}"
+                        >
+                            Открыть курс <span>→</span>
+                        </a>
+                    </div>
+
+                </article>
+                {% else %}
+                <div class="empty-state">
+                    <h3>Курсов не найдено</h3>
+                    <p>По твоему запросу ничего нет. Попробуй изменить параметры поиска.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <footer class="catalog-footer">
+            <a href="/">← Вернуться на главную</a>
+            <span>LearnHub · Учись в своём темпе</span>
+        </footer>
+
+    </main>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course[1] }} | LearnHub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+<body>
+    <main class="main-content">
+
+        <header class="topbar">
+            <a href="/" class="logo">LearnHub</a>
+            <nav>
+                {% if current_user %}
+                <a href="/profile">Мой профиль</a>
+                <a href="/my-courses">Мои курсы</a>
+                <a href="/logout">Выйти</a>
+                {% else %}
+                <a href="/login">Войти</a>
+                <a href="/register">Регистрация</a>
+                {% endif %}
+                <a href="/">Главная</a>
+                <a href="/courses">Курсы</a>
+                <a href="/quizzes">Тесты</a>
+                <a href="/reviews">Отзывы</a>
+                <form class="nav-search" action="/search" method="GET" role="search">
+                    <input type="search" name="q" placeholder="Поиск…" value="{{ request.args.get('q', '') if request.endpoint == 'search' else '' }}" aria-label="Поиск по сайту">
+                </form>
+                <button type="button" class="theme-toggle" title="Сменить тему">🌙</button>
+            </nav>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-list">
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <section class="hero course-hero">
+            <a href="/courses" class="breadcrumb">← Все курсы</a>
+
+            <p class="eyebrow">{{ course[3] or 'Обучение' }}</p>
+
+            <h1>{{ course[1] }}</h1>
+
+            <a href="#reviews" class="rating-line">
+                {% if course[5] is not none %}
+                <span class="stars" style="--rating: {{ course[5] }}" aria-hidden="true"></span>
+                <strong>{{ course[5] }}</strong>
+                <span>· {{ course[6] }} отзывов</span>
+                {% else %}
+                <span class="stars" style="--rating: 0" aria-hidden="true"></span>
+                <span>Пока нет отзывов</span>
+                {% endif %}
+            </a>
+
+            <p class="course-description">
+                Изучай новые навыки шаг за шагом и закрепляй знания на практике.
+            </p>
+
+            <div class="course-info">
+                <div>
+                    <span>Преподаватель</span>
+                    <strong>{{ course[4] or 'Не указан' }}</strong>
+                </div>
+
+                <div>
+                    <span>Стоимость</span>
+                    <strong>{{ "%.2f"|format(course[2] or 0) }} ₸</strong>
+                </div>
+
+                <div>
+                    <span>Программа</span>
+                    <strong>{{ lessons|length }} уроков</strong>
+                </div>
+            </div>
+
+            <div class="enroll-row">
+                {% if is_enrolled %}
+                <span class="enrolled-badge">✓ Ты записан на этот курс</span>
+                {% if lessons %}
+                <a href="/lessons/{{ lessons[0][0] }}" class="button">Продолжить обучение →</a>
+                {% endif %}
+                <a href="/my-courses" class="button button-ghost">Мои курсы</a>
+                {% elif current_user %}
+                <form method="POST" action="/courses/{{ course[0] }}/enroll">
+                    <button type="submit" class="button">Записаться на курс</button>
+                </form>
+                {% else %}
+                <a href="/login" class="button">Войди, чтобы записаться</a>
+                {% endif %}
+            </div>
+
+            {% if cert %}
+            <div class="cert-box {{ 'cert-ready' if cert.eligible else '' }}">
+                <span class="cert-icon">🎓</span>
+                <div class="cert-text">
+                    {% if cert.eligible %}
+                    <strong>Сертификат готов!</strong>
+                    <span>Ты прошёл курс — скачай сертификат в PDF.</span>
+                    {% elif cert.total %}
+                    <strong>Сертификат: сдано тестов {{ cert.passed }} из {{ cert.total }}</strong>
+                    <span>Сдай все тесты курса на {{ pass_score }}% и выше, чтобы получить сертификат.</span>
+                    <div class="cert-progress"><div style="width: {{ (cert.passed * 100 / cert.total)|round|int }}%"></div></div>
+                    {% else %}
+                    <strong>Сертификат</strong>
+                    <span>Станет доступен, когда курс будет отмечен как завершённый.</span>
+                    {% endif %}
+                </div>
+                {% if cert.eligible %}
+                <a href="/certificates/{{ course[0] }}.pdf" class="button">Скачать PDF ↓</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </section>
+
+        <section class="lessons-section">
+
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">ТВОЙ ПУТЬ К ЗНАНИЯМ</p>
+                    <h2>Программа обучения</h2>
+                    <p class="section-description">
+                        Последовательно изучай темы курса.
+                    </p>
+                </div>
+
+                <div class="lesson-total">
+                    <strong>{{ lessons|length }}</strong>
+                    <span>уроков</span>
+                </div>
+            </div>
+
+            <div class="lesson-list">
+
+                {% for lesson in lessons %}
+                <article class="lesson-card">
+
+                    <div class="lesson-number">
+                        {{ '%02d'|format(lesson[1]) }}
+                    </div>
+
+                    <div class="lesson-info">
+                        <span class="lesson-label">
+                            УРОК {{ lesson[1] }}
+                        </span>
+
+                        <h3>{{ lesson[2] }}</h3>
+
+                        <p class="lesson-subtitle">
+                            Учебный материал и практические знания
+                        </p>
+                    </div>
+
+                    <a
+                        href="/lessons/{{ lesson[0] }}"
+                        class="lesson-button"
+                    >
+                        <span class="button-text">Открыть урок</span>
+                        <span class="button-arrow">→</span>
+                    </a>
+
+                </article>
+                {% else %}
+
+                <div class="empty-state">
+                    <h3>Уроки скоро появятся</h3>
+                    <p>Для этого курса пока нет опубликованных уроков.</p>
+                </div>
+
+                {% endfor %}
+
+            </div>
+        </section>
+
+        <section class="reviews-section" id="reviews">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">МНЕНИЯ СТУДЕНТОВ</p>
+                    <h2>Отзывы о курсе</h2>
+                </div>
+                {% if course[5] is not none %}
+                <div class="rating-summary">
+                    <strong>{{ course[5] }}</strong>
+                    <span class="stars" style="--rating: {{ course[5] }}" aria-hidden="true"></span>
+                    <span>{{ course[6] }} отзывов</span>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if is_enrolled and cert.completed %}
+            <form class="review-form" method="POST" action="/courses/{{ course[0] }}/review">
+                <h3>{{ 'Изменить твой отзыв' if my_review else 'Оставь отзыв' }}</h3>
+                <fieldset class="star-input">
+                    <legend>Оценка</legend>
+                    {% for n in [5, 4, 3, 2, 1] %}
+                    <input type="radio" id="star{{ n }}" name="rating" value="{{ n }}"
+                           {% if my_review and my_review[0] == n %}checked{% endif %} required>
+                    <label for="star{{ n }}" title="{{ n }} из 5">★</label>
+                    {% endfor %}
+                </fieldset>
+                <textarea name="comment" rows="3" maxlength="1000"
+                          placeholder="Что понравилось, что можно улучшить?">{{ my_review[1] if my_review and my_review[1] else '' }}</textarea>
+                <button type="submit" class="button">{{ 'Сохранить изменения' if my_review else 'Отправить отзыв' }}</button>
+            </form>
+            {% elif is_enrolled %}
+            <p class="review-hint">✍️ Отзыв можно оставить после завершения курса — сдай все тесты
+                {% if cert.total %}(сейчас сдано {{ cert.passed }} из {{ cert.total }}){% endif %}.</p>
+            {% elif current_user %}
+            <p class="review-hint">Запишись на курс, чтобы оставить отзыв.</p>
+            {% else %}
+            <p class="review-hint"><a href="/login">Войди</a> и запишись на курс, чтобы оставить отзыв.</p>
+            {% endif %}
+
+            <div class="review-list">
+                {% for r in course_reviews %}
+                <article class="review-card">
+                    <div class="review-head">
+                        <span class="review-avatar">{{ (r[3] or '?')[:1]|upper }}</span>
+                        <div>
+                            <strong>{{ r[3] }}</strong>
+                            <span class="review-date">{{ r[2].strftime('%d.%m.%Y') if r[2] else '' }}</span>
+                        </div>
+                        <span class="stars" style="--rating: {{ r[0] }}" aria-label="{{ r[0] }} из 5"></span>
+                    </div>
+                    {% if r[1] %}<p>{{ r[1] }}</p>{% endif %}
+                </article>
+                {% else %}
+                <p class="review-hint">Отзывов пока нет — будь первым!</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <footer class="course-footer">
+            <a href="/courses">← Вернуться к каталогу курсов</a>
+            <span>LearnHub · Учись в своём темпе</span>
+        </footer>
+
+    </main>
+</body>
+</html>

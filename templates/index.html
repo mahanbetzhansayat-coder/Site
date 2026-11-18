@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyFlow — Учись новому</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+<body>
+    <aside class="sidebar">
+        <a href="/" class="logo">Study<span>Flow</span></a>
+
+        <form class="sidebar-search" action="/search" method="GET" role="search">
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <input type="search" name="q" placeholder="Курсы, уроки, тесты…" aria-label="Поиск по сайту">
+        </form>
+
+        <p class="menu-label">МЕНЮ</p>
+        <nav>
+            {% if current_user %}
+            <a href="/profile">Мой профиль</a>
+            <a href="/my-courses">Мои курсы</a>
+            <a href="/logout">Выйти</a>
+            {% else %}
+            <a href="/login">Войти</a>
+            <a href="/register">Регистрация</a>
+            {% endif %}
+            <a href="/" class="nav-link active">⌂ Главная</a>
+            <a href="/courses" class="nav-link">▤ Все курсы</a>
+            <a href="/quizzes" class="nav-link">✎ Тесты</a>
+            <a href="/reviews" class="nav-link">☆ Отзывы</a>
+            <button type="button" class="theme-toggle sidebar-theme" title="Сменить тему">
+                <span class="theme-icon">☾</span>
+                <span class="theme-label">Тёмная тема</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="help-card">
+                <div class="help-icon">✦</div>
+                <h3>Продолжай учиться!</h3>
+                <p>Каждый урок приближает тебя к цели.</p>
+            </div>
+            <p class="copyright">StudyFlow © 2026</p>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">ТВОЯ ОБРАЗОВАТЕЛЬНАЯ ПЛАТФОРМА</p>
+                <h1>Открой новые возможности.</h1>
+                <p class="subtitle">Изучай интересные темы и развивай свои навыки.</p>
+            </div>
+            {% if current_user %}
+            <a href="/profile" class="avatar" title="Мой профиль: {{ current_user.full_name }}">
+                {{ (current_user.full_name or '?')[:1]|upper }}
+            </a>
+            {% else %}
+            <a href="/login" class="avatar avatar-guest" title="Войти">→</a>
+            {% endif %}
+        </header>
+
+        <section class="hero hero-home">
+            <div class="hero-content">
+                <span class="badge">ТВОЁ БУДУЩЕЕ НАЧИНАЕТСЯ ЗДЕСЬ</span>
+                <h2>Знания открывают<br>новые горизонты.</h2>
+                <p>Выбирай курсы, изучай уроки и проверяй свои знания.</p>
+                <a href="/courses" class="primary-button">Исследовать курсы →</a>
+            </div>
+            <div class="hero-decoration">
+                <div class="orbit orbit-one"></div>
+                <div class="orbit orbit-two"></div>
+                <div class="book-icon">✦</div>
+                <div class="floating-card">✧ Учись каждый день</div>
+            </div>
+        </section>
+
+        <section class="stats">
+            <div class="stat-card">
+                <div class="stat-icon purple">▤</div>
+                <div>
+                    <p>Всего курсов</p>
+                    <h3>{{ stats[0] }}</h3>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue">▣</div>
+                <div>
+                    <p>Доступно уроков</p>
+                    <h3>{{ stats[1] }}</h3>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">♙</div>
+                <div>
+                    <p>Пользователей</p>
+                    <h3>{{ stats[2] }}</h3>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">◇</div>
+                <div>
+                    <p>Категорий</p>
+                    <h3>{{ stats[3] }}</h3>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">ОБУЧЕНИЕ</p>
+                    <h2>Популярные курсы</h2>
+                </div>
+                <a href="/courses" class="text-link">Все курсы →</a>
+            </div>
+
+            <div class="course-grid">
+                {% for course in courses %}
+                <article class="course-card">
+                    <div class="course-art art-{{ loop.index0 % 4 }}">
+                        <span class="course-category">{{ course[3] or 'Обучение' }}</span>
+                        <span class="course-symbol">
+                            {{ ['✦', '⌘', '◈', '✧'][loop.index0 % 4] }}
+                        </span>
+                    </div>
+                    <div class="course-info">
+                        <h3>{{ course[1] }}</h3>
+                        <p class="card-rating">
+                            {% if course[5] is not none %}
+                            <span class="stars" style="--rating: {{ course[5] }}" aria-hidden="true"></span>
+                            <strong>{{ course[5] }}</strong> <span>({{ course[6] }})</span>
+                            {% else %}
+                            <span class="no-rating">Нет оценок</span>
+                            {% endif %}
+                        </p>
+                        <p class="instructor">
+                            {{ course[4] or 'Преподаватель не указан' }}
+                        </p>
+                        <div class="course-footer">
+                            <span class="price">
+                                {% if course[2] is not none %}
+                                    {{ course[2] }} ₸
+                                {% else %}
+                                    Цена не указана
+                                {% endif %}
+                            </span>
+                            <a href="/courses/{{ course[0] }}" class="arrow-button">→</a>
+                        </div>
+                    </div>
+                </article>
+                {% else %}
+                <div class="empty-state">
+                    <h3>Курсов пока нет</h3>
+                    <p>Когда курсы появятся в базе данных, они отобразятся здесь.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <footer class="footer">
+            <span>StudyFlow</span>
+            <span>Учись в своём темпе.</span>
+        </footer>
+    </main>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет | LearnHub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+<body>
+    <main class="main-content">
+        <header class="topbar">
+            <a href="/" class="logo">LearnHub</a>
+            <nav>
+                {% if current_user %}
+                <a href="/profile">Мой профиль</a>
+                <a href="/my-courses">Мои курсы</a>
+                <a href="/logout">Выйти</a>
+                {% else %}
+                <a href="/login">Войти</a>
+                <a href="/register">Регистрация</a>
+                {% endif %}
+                <a href="/">Главная</a>
+                <a href="/courses">Курсы</a>
+                <a href="/quizzes">Тесты</a>
+                <a href="/reviews">Отзывы</a>
+                <form class="nav-search" action="/search" method="GET" role="search">
+                    <input type="search" name="q" placeholder="Поиск…" value="{{ request.args.get('q', '') if request.endpoint == 'search' else '' }}" aria-label="Поиск по сайту">
+                </form>
+                <button type="button" class="theme-toggle" title="Сменить тему">🌙</button>
+            </nav>
+        </header>
+
+        <section class="profile-header">
+            <p class="eyebrow">ТВОЁ ПРОСТРАНСТВО</p>
+            <h1>Личный кабинет</h1>
+            <p>Управляй своим обучением и развивай навыки вместе с LearnHub.</p>
+        </section>
+
+        <section class="profile-card">
+            <div class="profile-avatar">
+                {{ user.full_name[0]|upper if user and user.full_name else 'U' }}
+            </div>
+
+            <div class="profile-details">
+                <p class="eyebrow">ТВОЙ АККАУНТ</p>
+                <h2>{{ user.full_name if user else 'Имя пользователя' }}</h2>
+                <p>{{ user.email if user else 'email@example.com' }}</p>
+                <span class="profile-role">
+                    {{ user.role if user and user.role else 'Студент' }}
+                </span>
+            </div>
+
+            <a href="/logout" class="logout-button">Выйти из аккаунта</a>
+        </section>
+
+        <section class="profile-actions">
+            <a href="/my-courses" class="profile-action-card">
+                <span class="action-icon">📚</span>
+                <h3>Мои курсы</h3>
+                <p>Курсы, на которые ты записан, и твои результаты по ним.</p>
+                <span class="action-link">Открыть мои курсы →</span>
+            </a>
+
+            <a href="/quizzes" class="profile-action-card">
+                <span class="action-icon">✏️</span>
+                <h3>Тесты</h3>
+                <p>Проверяй свои знания и закрепляй материал.</p>
+                <span class="action-link">Перейти к тестам →</span>
+            </a>
+
+            <a href="/reviews" class="profile-action-card">
+                <span class="action-icon">⭐</span>
+                <h3>Отзывы</h3>
+                <p>Знакомься с мнениями других студентов.</p>
+                <span class="action-link">Читать отзывы →</span>
+            </a>
+        </section>
+
+        <footer class="course-footer">
+            <a href="/">← На главную</a>
+            <span>LearnHub · Учись в своём темпе</span>
+        </footer>
+    </main>
+</body>
+</html>

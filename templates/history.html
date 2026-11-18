@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>История результатов | LearnHub</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f5fa;
+            color: #25253a;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #5b5bd6;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #777;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px #00000008;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 16px 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            color: #777;
+            font-size: 13px;
+        }
+
+        .score {
+            color: #5b5bd6;
+            font-weight: bold;
+        }
+
+        .back {
+            display: inline-block;
+            margin-bottom: 25px;
+            color: #5b5bd6;
+            text-decoration: none;
+        }
+
+        .empty {
+            padding: 30px 0;
+            text-align: center;
+            color: #777;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 18px;
+            background: #5b5bd6;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a class="back" href="{{ url_for('quiz_list') }}">
+            ← Вернуться к тестам
+        </a>
+
+        <h1>История результатов</h1>
+        <p class="subtitle">
+            Здесь хранятся результаты всех твоих попыток.
+        </p>
+
+        <div class="card">
+            {% if attempts %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Тест</th>
+                            <th>Результат</th>
+                            <th>Дата</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for attempt in attempts %}
+                            <tr>
+                                <td>{{ attempt[0] }}</td>
+                                <td class="score">{{ attempt[1] }}%</td>
+                                <td>
+                                    {{ attempt[2].strftime('%d.%m.%Y %H:%M') }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty">
+                    <h3>Попыток пока нет</h3>
+                    <p>Пройди первый тест, чтобы увидеть результаты.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <a class="button" href="{{ url_for('quiz_list') }}">
+            Перейти к тестам
+        </a>
+    </div>
+</body>
+</html>

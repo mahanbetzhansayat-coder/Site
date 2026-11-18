@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ quiz[1] }} | LearnHub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+<body>
+    <main class="main-content">
+        <header class="topbar">
+            <a href="/" class="logo">LearnHub</a>
+            <nav>
+                {% if current_user %}
+                <a href="/profile">Мой профиль</a>
+                <a href="/my-courses">Мои курсы</a>
+                <a href="/logout">Выйти</a>
+                {% else %}
+                <a href="/login">Войти</a>
+                <a href="/register">Регистрация</a>
+                {% endif %}
+                <a href="/">Главная</a>
+                <a href="/courses">Курсы</a>
+                <a href="/quizzes">Тесты</a>
+                <a href="/reviews">Отзывы</a>
+                <form class="nav-search" action="/search" method="GET" role="search">
+                    <input type="search" name="q" placeholder="Поиск…" aria-label="Поиск по сайту">
+                </form>
+                <button type="button" class="theme-toggle" title="Сменить тему">🌙</button>
+            </nav>
+        </header>
+
+        <section class="quiz-head">
+            <a href="{{ url_for('quiz_list') }}" class="breadcrumb">← Все тесты</a>
+            <p class="eyebrow">ПРОВЕРКА ЗНАНИЙ</p>
+            <h1>{{ quiz[1] }}</h1>
+            <p class="subtitle">
+                {{ questions|length }} вопросов · выбери один ответ в каждом и нажми «Завершить тест».
+            </p>
+            <div class="quiz-progress" aria-hidden="true">
+                <div class="quiz-progress-bar" id="quiz-progress-bar"></div>
+            </div>
+            <p class="quiz-progress-text" id="quiz-progress-text">Отвечено: 0 из {{ questions|length }}</p>
+        </section>
+
+        <form method="POST" class="quiz-form" id="quiz-form">
+            {% for question in questions %}
+            <fieldset class="quiz-card">
+                <legend>
+                    <span class="quiz-number">{{ loop.index }}</span>
+                    {{ question[1] }}
+                </legend>
+
+                <div class="quiz-options">
+                    {% for option, text in [
+                        ('A', question[2]),
+                        ('B', question[3]),
+                        ('C', question[4]),
+                        ('D', question[5])
+                    ] %}
+                    <label class="quiz-option">
+                        <input type="radio" name="{{ question[0] }}" value="{{ option }}" required>
+                        <span class="quiz-letter">{{ option }}</span>
+                        <span class="quiz-text">{{ text }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </fieldset>
+            {% endfor %}
+
+            <button type="submit" class="button quiz-submit">Завершить тест ✓</button>
+        </form>
+
+        <footer class="footer">
+            <a href="{{ url_for('quiz_list') }}">← Все тесты</a>
+            <span>LearnHub · Учись в своём темпе</span>
+        </footer>
+    </main>
+
+    <script>
+        (function () {
+            var form = document.getElementById('quiz-form');
+            var bar = document.getElementById('quiz-progress-bar');
+            var text = document.getElementById('quiz-progress-text');
+            var total = form.querySelectorAll('.quiz-card').length;
+            form.addEventListener('change', function () {
+                var answered = form.querySelectorAll('input[type="radio"]:checked').length;
+                bar.style.width = (total ? answered * 100 / total : 0) + '%';
+                text.textContent = 'Отвечено: ' + answered + ' из ' + total;
+            });
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои курсы | LearnHub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+<body>
+    <main class="main-content">
+        <header class="topbar">
+            <a href="/" class="logo">LearnHub</a>
+            <nav>
+                <a href="/profile">Мой профиль</a>
+                <a href="/my-courses">Мои курсы</a>
+                <a href="/logout">Выйти</a>
+                <a href="/">Главная</a>
+                <a href="/courses">Курсы</a>
+                <a href="/quizzes">Тесты</a>
+                <a href="/reviews">Отзывы</a>
+                <form class="nav-search" action="/search" method="GET" role="search">
+                    <input type="search" name="q" placeholder="Поиск…" aria-label="Поиск по сайту">
+                </form>
+                <button type="button" class="theme-toggle" title="Сменить тему">🌙</button>
+            </nav>
+        </header>
+
+        <section class="my-courses-head">
+            <a href="/profile" class="breadcrumb">← Личный кабинет</a>
+            <p class="eyebrow">ТВОЁ ОБУЧЕНИЕ</p>
+            <h1>Мои курсы</h1>
+            <div class="my-courses-stats">
+                <div><strong>{{ courses|length }}</strong><span>всего</span></div>
+                <div><strong>{{ active }}</strong><span>в процессе</span></div>
+                <div><strong>{{ completed }}</strong><span>завершено</span></div>
+            </div>
+        </section>
+
+        {% if courses %}
+        <section class="my-course-list">
+            {% for c in courses %}
+            <article class="my-course-card">
+                <div class="my-course-main">
+                    <div class="my-course-tags">
+                        <span class="course-category">{{ c[2] or 'Без категории' }}</span>
+                        {% if c[4] == 'completed' %}
+                        <span class="status-badge status-completed">✓ Завершён</span>
+                        {% else %}
+                        <span class="status-badge status-active">● В процессе</span>
+                        {% endif %}
+                    </div>
+                    <h3><a href="/courses/{{ c[0] }}">{{ c[1] }}</a></h3>
+                    {% if c[9] %}
+                    <p class="my-course-tests">Тесты сданы: {{ c[10] }} из {{ c[9] }}</p>
+                    {% endif %}
+                    <p class="my-course-meta">
+                        {{ c[3] or 'Преподаватель не указан' }}
+                        · {{ c[6] }} уроков
+                        · записан {{ c[5].strftime('%d.%m.%Y') if c[5] else '—' }}
+                    </p>
+                </div>
+
+                <div class="my-course-score">
+                    {% if c[7] is not none %}
+                    <strong>{{ c[7]|int }}%</strong>
+                    <span>средний балл</span>
+                    {% else %}
+                    <strong>—</strong>
+                    <span>нет попыток</span>
+                    {% endif %}
+                </div>
+
+                <div class="my-course-actions">
+                    {% if c[8] %}
+                    <a href="/lessons/{{ c[8] }}" class="button">
+                        {{ 'Повторить' if c[4] == 'completed' else 'Продолжить' }} →
+                    </a>
+                    {% endif %}
+                    {% if c[4] == 'completed' or (c[9] and c[10] >= c[9]) %}
+                    <a href="/certificates/{{ c[0] }}.pdf" class="button button-cert" title="Скачать сертификат (PDF)">🎓 Сертификат</a>
+                    {% endif %}
+                    <a href="/courses/{{ c[0] }}" class="button button-ghost">Программа</a>
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+        {% else %}
+        <div class="empty-state">
+            <h3>Ты пока не записан ни на один курс</h3>
+            <p>Выбери курс в каталоге и нажми «Записаться на курс».</p>
+            <p style="margin-top: 16px;"><a href="/courses" class="button">Открыть каталог →</a></p>
+        </div>
+        {% endif %}
+
+        <footer class="footer">
+            <a href="/courses">← Каталог курсов</a>
+            <span>LearnHub · Учись в своём темпе</span>
+        </footer>
+    </main>
+</body>
+</html>

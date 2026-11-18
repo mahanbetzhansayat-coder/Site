@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тесты | LearnHub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+<body>
+    <main class="main-content">
+        <header class="topbar">
+            <a href="/" class="logo">LearnHub</a>
+            <nav>
+                {% if current_user %}
+                <a href="/profile">Мой профиль</a>
+                <a href="/my-courses">Мои курсы</a>
+                <a href="/logout">Выйти</a>
+                {% else %}
+                <a href="/login">Войти</a>
+                <a href="/register">Регистрация</a>
+                {% endif %}
+                <a href="/">Главная</a>
+                <a href="/courses">Курсы</a>
+                <a href="/quizzes">Тесты</a>
+                <a href="/reviews">Отзывы</a>
+                <form class="nav-search" action="/search" method="GET" role="search">
+                    <input type="search" name="q" placeholder="Поиск…" value="{{ request.args.get('q', '') if request.endpoint == 'search' else '' }}" aria-label="Поиск по сайту">
+                </form>
+                <button type="button" class="theme-toggle" title="Сменить тему">🌙</button>
+            </nav>
+        </header>
+
+        <section class="hero">
+            <p class="eyebrow">ПРОВЕРКА ЗНАНИЙ</p>
+            <h1>Тесты</h1>
+            <p>Выбирай урок и проверяй свои знания.</p>
+        </section>
+
+        <form class="search-filter-form" method="GET" action="/quizzes">
+            <input type="search" name="q" placeholder="Найти тест по названию, уроку или курсу…" value="{{ search_query }}">
+            <button type="submit" class="button">Найти</button>
+            {% if search_query %}<a class="button button-ghost" href="/quizzes">Сбросить</a>{% endif %}
+        </form>
+
+        <section class="course-grid">
+            {% for quiz in quizzes %}
+            <article class="course-card">
+                <p class="eyebrow">{{ quiz[3] }}</p>
+                <h2>{{ quiz[1] }}</h2>
+                <p>Урок: {{ quiz[2] }}</p>
+                <a class="button" href="/quizzes/{{ quiz[0] }}">Пройти тест →</a>
+            </article>
+            {% else %}
+            <div class="empty-state">
+                {% if search_query %}
+                <h3>Ничего не найдено</h3>
+                <p>По запросу «{{ search_query }}» тестов нет.</p>
+                {% else %}
+                <h3>Тестов пока нет</h3>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </section>
+    </main>
+</body>
+</html>

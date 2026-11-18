@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ lesson[2] }} | LearnHub</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+
+<body>
+    <main class="main-content">
+
+        <header class="topbar">
+            <a href="/" class="logo">LearnHub</a>
+
+            <nav>
+                {% if current_user %}
+                <a href="/profile">Мой профиль</a>
+                <a href="/my-courses">Мои курсы</a>
+                <a href="/logout">Выйти</a>
+                {% else %}
+                <a href="/login">Войти</a>
+                <a href="/register">Регистрация</a>
+                {% endif %}
+                <a href="/">Главная</a>
+                <a href="/courses">Курсы</a>
+                <a href="/quizzes">Тесты</a>
+                <a href="/reviews">Отзывы</a>
+                <form class="nav-search" action="/search" method="GET" role="search">
+                    <input type="search" name="q" placeholder="Поиск…" value="{{ request.args.get('q', '') if request.endpoint == 'search' else '' }}" aria-label="Поиск по сайту">
+                </form>
+                <button type="button" class="theme-toggle" title="Сменить тему">🌙</button>
+            </nav>
+        </header>
+
+        <div class="lesson-layout">
+
+            <section class="lesson-main">
+
+                <a href="/courses/{{ lesson[3] }}" class="breadcrumb">
+                    ← {{ lesson[4] }}
+                </a>
+
+                <div class="lesson-header">
+                    <span class="lesson-label">
+                        УРОК {{ lesson[1] }}
+                    </span>
+
+                    <h1>{{ lesson[2] }}</h1>
+
+                    <p>
+                        Изучай материал, разбирай примеры и закрепляй
+                        полученные знания на практике.
+                    </p>
+                </div>
+
+                <article class="lesson-content">
+
+                    <div class="content-heading">
+                        <span class="content-icon">📘</span>
+
+                        <div>
+                            <h2>Материал урока</h2>
+                            <p>Теория и практические примеры</p>
+                        </div>
+                    </div>
+
+                    {% if lesson[5] %}
+                    <div class="lesson-body">
+                        {{ lesson[5]|markdown }}
+                    </div>
+                    {% else %}
+                    <div class="lesson-placeholder">
+                        <h3>Материал скоро появится</h3>
+                        <p>Теория, примеры и задания для этого урока ещё готовятся.</p>
+                    </div>
+                    {% endif %}
+
+                </article>
+
+                <div class="lesson-navigation">
+                    {% if prev_id %}
+                    <a href="/lessons/{{ prev_id }}" class="back-button">← Предыдущий урок</a>
+                    {% else %}
+                    <a href="/courses/{{ lesson[3] }}" class="back-button">← К программе курса</a>
+                    {% endif %}
+
+                    {% if quiz_id %}
+                    <a href="/quizzes/{{ quiz_id }}" class="back-button">✎ Тест по уроку</a>
+                    {% endif %}
+
+                    {% if next_id %}
+                    <a href="/lessons/{{ next_id }}" class="next-button">Следующий урок →</a>
+                    {% else %}
+                    <a href="/courses/{{ lesson[3] }}" class="next-button">Завершить курс ✓</a>
+                    {% endif %}
+                </div>
+
+            </section>
+
+            <aside class="lesson-sidebar">
+
+                <div class="sidebar-card">
+                    <p class="eyebrow">ТВОЁ ОБУЧЕНИЕ</p>
+
+                    <h3>Программа курса</h3>
+
+                    <p class="sidebar-description">
+                        Возвращайся к программе, чтобы выбрать другой урок.
+                    </p>
+
+                    <a
+                        href="/courses/{{ lesson[3] }}"
+                        class="sidebar-button"
+                    >
+                        Все уроки курса →
+                    </a>
+                </div>
+
+                <div class="sidebar-card">
+                    <p class="eyebrow">СОВЕТ</p>
+
+                    <h3>Учись постепенно</h3>
+
+                    <p class="sidebar-description">
+                        Разбирай примеры, пробуй писать код самостоятельно
+                        и возвращайся к сложным темам.
+                    </p>
+                </div>
+
+            </aside>
+
+        </div>
+
+        <footer class="course-footer">
+            <a href="/courses">← Каталог курсов</a>
+            <span>LearnHub · Учись в своём темпе</span>
+        </footer>
+
+    </main>
+</body>
+</html>

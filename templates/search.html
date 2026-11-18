@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if search_query %}«{{ search_query }}» — поиск{% else %}Поиск{% endif %} | StudyFlow</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+<body>
+    <main class="main-content">
+        <header class="topbar">
+            <a href="/" class="logo">LearnHub</a>
+            <nav>
+                {% if current_user %}
+                <a href="/profile">Мой профиль</a>
+                <a href="/my-courses">Мои курсы</a>
+                <a href="/logout">Выйти</a>
+                {% else %}
+                <a href="/login">Войти</a>
+                <a href="/register">Регистрация</a>
+                {% endif %}
+                <a href="/">Главная</a>
+                <a href="/courses">Курсы</a>
+                <a href="/quizzes">Тесты</a>
+                <a href="/reviews">Отзывы</a>
+                <button type="button" class="theme-toggle" title="Сменить тему">🌙</button>
+            </nav>
+        </header>
+
+        <section class="search-page-head">
+            <p class="eyebrow">ПОИСК</p>
+            <h1>
+                {% if search_query %}Результаты по запросу «{{ search_query }}»{% else %}Что будем искать?{% endif %}
+            </h1>
+
+            <form class="search-filter-form" method="GET" action="/search" role="search">
+                <input type="search" name="q" value="{{ search_query }}"
+                       placeholder="Курсы, уроки, тесты, преподаватели…" autofocus>
+                <button type="submit" class="button">Найти</button>
+            </form>
+
+            {% if search_query %}
+            <div class="search-tabs">
+                <a href="#courses">Курсы <span>{{ courses|length }}</span></a>
+                <a href="#lessons">Уроки <span>{{ lessons|length }}</span></a>
+                <a href="#quizzes">Тесты <span>{{ quizzes|length }}</span></a>
+            </div>
+            {% endif %}
+        </section>
+
+        {% if search_query and total == 0 %}
+        <div class="empty-state">
+            <h3>Ничего не найдено</h3>
+            <p>Попробуй другое слово или более короткий запрос.</p>
+        </div>
+        {% endif %}
+
+        {% if courses %}
+        <section class="search-group" id="courses">
+            <h2>Курсы</h2>
+            <div class="course-grid">
+                {% for course in courses %}
+                <article class="course-card">
+                    <span class="course-category">{{ course[3] or 'Без категории' }}</span>
+                    <h3>{{ course[1] }}</h3>
+                    <p class="course-instructor">{{ course[4] or 'Преподаватель не указан' }}</p>
+                    <div class="course-footer">
+                        <span class="price">
+                            {% if course[2] is not none %}{{ course[2] }} ₸{% else %}Цена не указана{% endif %}
+                        </span>
+                        <a href="/courses/{{ course[0] }}" class="arrow-button" aria-label="Открыть курс">→</a>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if lessons %}
+        <section class="search-group" id="lessons">
+            <h2>Уроки</h2>
+            <div class="search-list">
+                {% for lesson in lessons %}
+                <a class="search-row" href="/lessons/{{ lesson[0] }}">
+                    <span class="search-row-icon">▣</span>
+                    <span class="search-row-text">
+                        <strong>{{ lesson[1] }}</strong>
+                        <small>{{ lesson[4] }} · урок {{ lesson[2] }}</small>
+                    </span>
+                    <span class="search-row-arrow">→</span>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if quizzes %}
+        <section class="search-group" id="quizzes">
+            <h2>Тесты</h2>
+            <div class="search-list">
+                {% for quiz in quizzes %}
+                <a class="search-row" href="/quizzes/{{ quiz[0] }}">
+                    <span class="search-row-icon">✎</span>
+                    <span class="search-row-text">
+                        <strong>{{ quiz[1] }}</strong>
+                        <small>{{ quiz[3] }} · {{ quiz[2] }}</small>
+                    </span>
+                    <span class="search-row-arrow">→</span>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <footer class="footer">
+            <a href="/">← На главную</a>
+            <span>Учись в своём темпе.</span>
+        </footer>
+    </main>
+</body>
+</html>

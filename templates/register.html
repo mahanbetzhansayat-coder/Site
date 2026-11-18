@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация | LearnHub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+<body>
+    <main class="main-content">
+        <header class="topbar">
+            <a href="/" class="logo">LearnHub</a>
+            <nav>
+                {% if current_user %}
+                <a href="/profile">Мой профиль</a>
+                <a href="/my-courses">Мои курсы</a>
+                <a href="/logout">Выйти</a>
+                {% else %}
+                <a href="/login">Войти</a>
+                <a href="/register">Регистрация</a>
+                {% endif %}
+                <a href="/">Главная</a>
+                <a href="/courses">Курсы</a>
+                <a href="/quizzes">Тесты</a>
+                <a href="/reviews">Отзывы</a>
+                <form class="nav-search" action="/search" method="GET" role="search">
+                    <input type="search" name="q" placeholder="Поиск…" value="{{ request.args.get('q', '') if request.endpoint == 'search' else '' }}" aria-label="Поиск по сайту">
+                </form>
+                <button type="button" class="theme-toggle" title="Сменить тему">🌙</button>
+            </nav>
+        </header>
+
+        <section class="auth-layout">
+            <div class="auth-info">
+                <p class="eyebrow">ТВОЁ ОБУЧЕНИЕ НАЧИНАЕТСЯ ЗДЕСЬ</p>
+                <h1>Создай свой аккаунт</h1>
+                <p>Присоединяйся к LearnHub, изучай новые технологии и отслеживай свой прогресс.</p>
+                <div class="auth-benefits">
+                    <div>✦ Доступ к обучающим курсам</div>
+                    <div>✦ Тесты для проверки знаний</div>
+                    <div>✦ Личный кабинет и прогресс</div>
+                </div>
+            </div>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="auth-messages">
+{% for category, message in messages %}
+<div class="auth-message {{ category }}">{{ message }}</div>
+{% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+            <form class="auth-card" method="POST" action="/register">
+                <h2>Регистрация</h2>
+                <p class="auth-subtitle">Заполни данные для создания аккаунта</p>
+
+                <label for="full_name">Полное имя</label>
+                <input type="text" id="full_name" name="full_name"
+                       placeholder="Например, Дениз Закиров"
+                       autocomplete="name" required>
+
+                <label for="email">Электронная почта</label>
+                <input type="email" id="email" name="email"
+                       placeholder="you@example.com"
+                       autocomplete="email" required>
+
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password"
+                       placeholder="Минимум 8 символов"
+                       minlength="8" autocomplete="new-password" required>
+
+                <button type="submit" class="auth-submit">Создать аккаунт →</button>
+
+                <p class="auth-switch">
+                    Уже есть аккаунт? <a href="/login">Войти</a>
+                </p>
+            </form>
+        </section>
+
+        <footer class="course-footer">
+            <a href="/">← На главную</a>
+            <span>LearnHub · Учись в своём темпе</span>
+        </footer>
+    </main>
+</body>
+</html>
